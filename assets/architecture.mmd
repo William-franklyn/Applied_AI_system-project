@@ -1,0 +1,24 @@
+flowchart TD
+    A["🎵 Streamlit UI (app.py)\nSidebar: genre · mood · energy · acoustic\nMain: ranked results + confidence badges"] --> B
+
+    B["🔍 Retrieval Layer\nsrc/recommender.py\nload_songs() → pandas CSV\n_score_song() → weighted match\nrecommend_songs() → top-k ranked"] --> C
+
+    C["🤖 Generation Layer (RAG)\nsrc/ai_explainer.py\nBuild grounded prompt from retrieved songs\nCall Gemini API\nReturn natural language explanation"] --> D
+
+    B --> E
+
+    E["🛡️ Guardrails\nsrc/guardrails.py\nValidate genre · mood · energy\nBlock invalid inputs before scoring"]
+
+    D --> F["📋 Logging\nsrc/logger_config.py\nJSON-lines rotating file log\nConsole output"]
+
+    G["📂 Data\ndata/songs.csv\n10 songs · 6 genres · 6 moods\nenergy · acousticness · tempo"] --> B
+
+    H["👤 User Preferences\nfavorite_genre\nfavorite_mood\ntarget_energy 0–1\nlikes_acoustic bool"] --> A
+
+    style A fill:#4A90D9,color:#fff
+    style B fill:#7B68EE,color:#fff
+    style C fill:#50C878,color:#fff
+    style E fill:#FF6B6B,color:#fff
+    style F fill:#FFB347,color:#fff
+    style G fill:#87CEEB,color:#000
+    style H fill:#DDA0DD,color:#000
