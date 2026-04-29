@@ -115,6 +115,14 @@ pytest
 
 All 7 tests pass without an API key.
 
+### Running the Evaluation Script
+
+```bash
+python eval.py
+```
+
+Runs 5 predefined user profiles through the recommender and 4 guardrail edge cases, then prints a pass/fail summary. No API key needed.
+
 ---
 
 ## Sample Interactions
@@ -176,11 +184,50 @@ This shows how the 30% mood weight surfaces cross-genre results when no genre ma
 
 ---
 
-## Testing Summary
+## Reliability, Guardrails, and Evaluation
 
-7 automated tests cover: sorted recommendation output, correct k-limiting, `load_songs` structure validation, score ordering, guardrail rejection of out-of-range energy, and confidence label presence in explanations. **7/7 pass.**
+### Guardrail Behavior
 
-The system struggled with cross-genre recommendations — if a user's favorite genre has no match in the catalog, scores stay low even with good mood/energy alignment. Partial genre credit (e.g., treating "indie pop" and "pop" as 60% similar) would improve this.
+All user inputs pass through `src/guardrails.py` before reaching the recommender. Invalid inputs are rejected with a clear error message — the app never crashes on bad input.
+
+| Input | Problem | Result |
+|---|---|---|
+| `energy = 1.5` | Out of range (must be 0.0–1.0) | `Energy must be a number between 0.0 and 1.0, got: 1.5` |
+| `genre = ""` | Missing required field | `Genre is required.` |
+| `genre = "metal"` | Not in valid set | `Unknown genre 'metal'. Valid options: [...]` |
+| `genre = "lofi", mood = ""` | Missing mood | `Mood is required.` |
+
+In the Streamlit UI, blocked inputs show as a red error banner and stop execution before any scoring occurs.
+
+### AI Explanation Fallback
+
+If no `GEMINI_API_KEY` is set (or the API quota is exceeded), the system falls back gracefully:
+
+```
+[AI explanation unavailable: set GEMINI_API_KEY in your .env file to enable this feature]
+```
+
+All rule-based recommendations, confidence scores, and explanations continue to work normally. The fallback is an intentional design decision — the core system never depends on the AI layer being available.
+
+### Automated Tests
+
+7 pytest tests cover: sorted recommendation output, k-limiting, `load_songs` structure, score ordering, guardrail rejection, and confidence label presence. **7/7 pass.**
+
+### Evaluation Script
+
+`eval.py` runs 5 predefined user profiles and 4 guardrail edge cases end-to-end and prints a structured report:
+
+```
+================================================================
+  SUMMARY
+================================================================
+  Recommendation checks : 5/5 passed
+  Guardrail checks      : 4/4 correctly blocked
+  Overall               : 9/9 checks passed
+================================================================
+```
+
+The system struggled with cross-genre recommendations — if a user's favorite genre has no match in the catalog, scores stay moderate even with good mood/energy alignment. Partial genre credit (e.g., treating "indie pop" and "pop" as 60% similar) would improve this.
 
 ---
 
