@@ -8,7 +8,7 @@ The original project scaffolded a rule-based music recommender with `Song` and `
 
 ## Demo Walkthrough
 
-> **Loom video:** *(add your walkthrough link here)*
+> **Loom video:** [Watch the demo](https://www.loom.com/share/2db33ebdefe9455abf95830b8e742faf)
 
 ---
 
